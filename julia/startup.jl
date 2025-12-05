@@ -21,7 +21,7 @@ end
 # `{@b,@be,@bs} <expr>` for fast benchmarking
 @try_using PrettyChairmarks
 
-if VERSION <= v"1.12"
+if VERSION.minor < 13
     # syntax highlighting, bracket completion
     @try_using OhMyREPL
 
