@@ -1,0 +1,9 @@
+# Don't store duplicate consecutive commands
+export HISTCONTROL=ignoredups:erasedups
+# Merge history across sessions, so history is continuous
+shopt -s histappend
+PROMPT_COMMAND="history -a; history -c; history -r; $PROMPT_COMMAND"
+
+# Prefix-based history search with arrow keys
+bind '"\e[A": history-search-backward'
+bind '"\e[B": history-search-forward'

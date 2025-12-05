@@ -1,0 +1,5 @@
+[user]
+        name = Anton Oresten
+        email = antonoresten@proton.com
+[credential]
+        helper = store
