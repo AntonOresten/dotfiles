@@ -1,3 +1,3 @@
 ```bash
-https://github.com/AntonOresten/dotfiles && ./dotfiles/install.sh
+git clone https://github.com/AntonOresten/dotfiles && ./dotfiles/install.sh
 ```
