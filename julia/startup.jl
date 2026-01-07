@@ -41,3 +41,7 @@ end
 macro register()
     :(Pkg.Registry.update(); LocalRegistry.register(registry=get(ENV, "LOCAL_REGISTRY", "MurrellGroupRegistry")))
 end
+
+let local_file = joinpath(@__DIR__, "startup_local.jl")
+    isfile(local_file) && include(local_file)
+end
