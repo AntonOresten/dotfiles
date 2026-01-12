@@ -38,8 +38,8 @@ end
 
 @try_using LocalRegistry
 # if another registry is installed, make an attempt to register current project
-macro register()
-    :(Pkg.Registry.update(); LocalRegistry.register(registry=get(ENV, "LOCAL_REGISTRY", "MurrellGroupRegistry")))
+macro register(args...)
+    :(Pkg.Registry.update(); LocalRegistry.register(args..., registry=get(ENV, "LOCAL_REGISTRY", "MurrellGroupRegistry")))
 end
 
 let local_file = joinpath(@__DIR__, "startup_local.jl")
