@@ -1,6 +1,6 @@
 using Pkg
 
-macro try_using(pkgs...)
+macro using!!(pkgs...)
     expr = :()
     for pkg in pkgs
         pkg_str = string(pkg)
@@ -16,14 +16,26 @@ macro try_using(pkgs...)
 end
 
 # package/code updates through file-watching
-@try_using Revise
+@using!! Revise
 
 # `{@b,@be,@bs} <expr>` for fast benchmarking
-@try_using PrettyChairmarks
+@using!! PrettyChairmarks
+
+macro bc(f, keywords...)
+    :(@b (CUDA.@sync $f) $(keywords...))
+end
+
+macro bec(f, keywords...)
+    :(@be (CUDA.@sync $f) $(keywords...))
+end
+
+macro bsc(f, keywords...)
+    :(@bs (CUDA.@sync $f) $(keywords...))
+end
 
 if VERSION.minor < 13
     # syntax highlighting, bracket completion
-    @try_using OhMyREPL
+    @using!! OhMyREPL
 
     # colorschemes at:
     # https://kristofferc.github.io/OhMyREPL.jl/stable/features/syntax_highlighting/
@@ -36,7 +48,7 @@ if VERSION.minor < 13
     end
 end
 
-@try_using LocalRegistry
+@using!! LocalRegistry
 # if another registry is installed, make an attempt to register current project
 macro register(args...)
     :(Pkg.Registry.update(); LocalRegistry.register($(esc(args...)), registry=get(ENV, "LOCAL_REGISTRY", "MurrellGroupRegistry")))
