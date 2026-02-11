@@ -5,5 +5,7 @@ shopt -s histappend
 PROMPT_COMMAND="history -a; history -c; history -r; $PROMPT_COMMAND"
 
 # Prefix-based history search with arrow keys
-bind '"\e[A": history-search-backward'
-bind '"\e[B": history-search-forward'
+if [[ $- == *i* ]]; then
+    bind '"\e[A": history-search-backward'
+    bind '"\e[B": history-search-forward'
+fi
