@@ -7,8 +7,15 @@ macro using!!(pkgs...)
         push!(expr.args, :(try
             using $pkg
         catch
-            @info "Failed to load $($pkg_str). Attempting to install..."
-            Pkg.add($pkg_str)
+            @info "Failed to load $($pkg_str). Attempting to install to global environment..."
+            let _prev = Base.active_project()
+                Pkg.activate()          # switches to default global env (@v1.x)
+                try
+                    Pkg.add($pkg_str)
+                finally
+                    Pkg.activate(_prev)  # always restore, even if Pkg.add fails
+                end
+            end
             using $pkg
         end))
     end
