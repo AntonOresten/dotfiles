@@ -1,40 +1,35 @@
 #!/usr/bin/env bash
 set -euo pipefail
-
 echo "==> Installing dotfiles…"
 
 # Directory where this script lives (your dotfiles repo root)
-
 DOTFILES_DIR="$(
-cd "$(dirname "${BASH_SOURCE[0]}")"
-pwd
+  cd "$(dirname "${BASH_SOURCE[0]}")"
+  pwd
 )"
 
 OS="$(uname -s)"
 
 backup() {
-local target="$1"
-if [ -e "$target" ] && [ ! -L "$target" ]; then
-local backup_name="${target}.bak-$(date +%Y%m%d%H%M%S)"
-echo "  - Backing up $target -> $backup_name"
-mv "$target" "$backup_name"
-fi
+  local target="$1"
+  if [ -e "$target" ] && [ ! -L "$target" ]; then
+    local backup_name="${target}.bak-$(date +%Y%m%d%H%M%S)"
+    echo "  - Backing up $target -> $backup_name"
+    mv "$target" "$backup_name"
+  fi
 }
 
 link() {
-local src="$1"
-local dest="$2"
-
-mkdir -p "$(dirname "$dest")"
-
-if [ -L "$dest" ] && [ "$(readlink "$dest")" = "$src" ]; then
-echo "  = Link already correct: $dest"
-return
-fi
-
-backup "$dest"
-ln -sfn "$src" "$dest"
-echo "  + Linked $dest -> $src"
+  local src="$1"
+  local dest="$2"
+  mkdir -p "$(dirname "$dest")"
+  if [ -L "$dest" ] && [ "$(readlink "$dest")" = "$src" ]; then
+    echo "  = Link already correct: $dest"
+    return
+  fi
+  backup "$dest"
+  ln -sfn "$src" "$dest"
+  echo "  + Linked $dest -> $src"
 }
 
 echo "-> Linking tmux config"
@@ -54,16 +49,19 @@ fi
 echo "-> Linking Julia startup"
 link "$DOTFILES_DIR/julia/startup.jl" "$HOME/.julia/config/startup.jl"
 
-# Create minimal .bashrc if missing, that sources common + local
-
 # Configure .bashrc
 if [ "$OS" = "Linux" ]; then
-  BASHRC_CONTENT='
-# Added by dotfiles install.sh
+  BASHRC_CONTENT='# Added by dotfiles install.sh
+
+# Exit early for non-interactive shells (protects bind, prompt, etc.)
+case $- in
+    *i*) ;;
+      *) return;;
+esac
+
 [ -f "$HOME/.bashrc_common" ] && . "$HOME/.bashrc_common"
 [ -f "$HOME/.bashrc.local" ] && . "$HOME/.bashrc.local"
 '
-
   if [ ! -f "$HOME/.bashrc" ]; then
     echo "-> Creating minimal ~/.bashrc"
     echo "$BASHRC_CONTENT" > "$HOME/.bashrc"
@@ -71,23 +69,21 @@ if [ "$OS" = "Linux" ]; then
     echo "-> Prepending to ~/.bashrc"
     temp_bash="$(mktemp)"
     echo "$BASHRC_CONTENT" > "$temp_bash"
-    cat "$HOME/.bashrc" >> "$temp_bash"
+    # Strip any existing interactive guards from old content to avoid duplication
+    sed -E '/^# If not running interactively/,/return;;\s*$/d; /^case \$- in$/,/^\s*esac$/d' "$HOME/.bashrc" >> "$temp_bash"
     mv "$temp_bash" "$HOME/.bashrc"
   else
     echo "  = ~/.bashrc already sources common config"
   fi
 fi
 
-# Create minimal .zshrc if missing, that sources common + local
-
 # Configure .zshrc
 if [ "$OS" = "Darwin" ]; then
-  ZSHRC_CONTENT='
-# Added by dotfiles install.sh
+  ZSHRC_CONTENT='# Added by dotfiles install.sh
+
 [ -f "$HOME/.zshrc_common" ] && . "$HOME/.zshrc_common"
 [ -f "$HOME/.zshrc.local" ] && . "$HOME/.zshrc.local"
 '
-
   if [ ! -f "$HOME/.zshrc" ]; then
     echo "-> Creating minimal ~/.zshrc"
     echo "$ZSHRC_CONTENT" > "$HOME/.zshrc"
@@ -103,7 +99,6 @@ if [ "$OS" = "Darwin" ]; then
 fi
 
 echo "==> Done."
-
 echo
 echo "Next steps:"
 echo "  - Open a new shell, or run:  source ~/.bashrc  (or ~/.zshrc)"
