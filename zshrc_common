@@ -6,3 +6,12 @@ setopt SHARE_HISTORY
 
 bindkey "^[[A" history-beginning-search-backward
 bindkey "^[[B" history-beginning-search-forward
+
+# Auto-sync dotfiles from the repo this file is symlinked from
+# ${(%):-%x} = path of this sourced file; :A resolves the symlink
+__df_self="${${(%):-%x}:A}"
+if [ -n "$__df_self" ]; then
+    DOTFILES_DIR="${__df_self:h}"
+    [ -f "$DOTFILES_DIR/sync.sh" ] && . "$DOTFILES_DIR/sync.sh"
+fi
+unset __df_self

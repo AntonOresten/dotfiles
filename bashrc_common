@@ -9,3 +9,11 @@ if [[ $- == *i* ]]; then
     bind '"\e[A": history-search-backward'
     bind '"\e[B": history-search-forward'
 fi
+
+# Auto-sync dotfiles from the repo this file is symlinked from
+__df_self="$(readlink -f "${BASH_SOURCE[0]}" 2>/dev/null)"
+if [ -n "$__df_self" ]; then
+    DOTFILES_DIR="$(cd "$(dirname "$__df_self")" && pwd)"
+    [ -f "$DOTFILES_DIR/sync.sh" ] && . "$DOTFILES_DIR/sync.sh"
+fi
+unset __df_self

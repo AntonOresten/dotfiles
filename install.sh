@@ -49,53 +49,76 @@ fi
 echo "-> Linking Julia startup"
 link "$DOTFILES_DIR/julia/startup.jl" "$HOME/.julia/config/startup.jl"
 
-# Configure .bashrc
-if [ "$OS" = "Linux" ]; then
-  BASHRC_CONTENT='# Added by dotfiles install.sh
+# --- Managed block in shell rc files -------------------------------------
+# We keep only a tiny, marker-delimited stub in ~/.bashrc / ~/.zshrc that
+# sources the symlinked *_common (and *.local) files. All real logic lives
+# in the repo, so it auto-updates; the stub is refreshed in place on every
+# install via the markers, without touching anything outside them.
 
-# Exit early for non-interactive shells (protects bind, prompt, etc.)
-case $- in
-    *i*) ;;
-      *) return;;
-esac
+MARK_BEGIN="# >>> dotfiles managed block >>>"
+MARK_END="# <<< dotfiles managed block <<<"
 
-[ -f "$HOME/.bashrc_common" ] && . "$HOME/.bashrc_common"
-[ -f "$HOME/.bashrc.local" ] && . "$HOME/.bashrc.local"
-'
-  if [ ! -f "$HOME/.bashrc" ]; then
-    echo "-> Creating minimal ~/.bashrc"
-    echo "$BASHRC_CONTENT" > "$HOME/.bashrc"
-  elif ! grep -q "bashrc_common" "$HOME/.bashrc"; then
-    echo "-> Prepending to ~/.bashrc"
-    temp_bash="$(mktemp)"
-    echo "$BASHRC_CONTENT" > "$temp_bash"
-    # Strip any existing interactive guards from old content to avoid duplication
-    sed -E '/^# If not running interactively/,/return;;\s*$/d; /^case \$- in$/,/^\s*esac$/d' "$HOME/.bashrc" >> "$temp_bash"
-    mv "$temp_bash" "$HOME/.bashrc"
-  else
-    echo "  = ~/.bashrc already sources common config"
+ensure_managed_block() {
+  local file="$1" body="$2"
+  local block
+  printf -v block '%s\n# Managed by dotfiles install.sh — do not edit between these markers.\n%s\n%s' \
+    "$MARK_BEGIN" "$body" "$MARK_END"
+
+  if [ ! -f "$file" ]; then
+    echo "-> Creating $file"
+    printf '%s\n' "$block" > "$file"
+    return
   fi
+
+  local bak="${file}.bak-$(date +%Y%m%d%H%M%S)"
+  cp "$file" "$bak"
+
+  if grep -qF "$MARK_BEGIN" "$file"; then
+    # Refresh just the region between the markers, leave the rest untouched.
+    local tmp
+    tmp="$(mktemp)"
+    awk -v b="$MARK_BEGIN" -v e="$MARK_END" -v r="$block" '
+      $0==b { print r; skip=1; next }
+      skip && $0==e { skip=0; next }
+      skip { next }
+      { print }
+    ' "$file" > "$tmp"
+    if cmp -s "$tmp" "$file"; then
+      echo "  = $file managed block already current"
+      rm -f "$tmp" "$bak"
+    else
+      mv "$tmp" "$file"
+      echo "-> Refreshed managed block in $file (backup: $bak)"
+    fi
+    return
+  fi
+
+  # No markers: migrate an old unmarked install (delete its injected lines),
+  # then prepend the marked stub. Anything we don't recognize is preserved.
+  local tmp
+  tmp="$(mktemp)"
+  printf '%s\n\n' "$block" > "$tmp"
+  sed -E '/^# Added by dotfiles install\.sh$/,/\.local" \] && \. "/d' "$file" >> "$tmp"
+  if cmp -s "$tmp" "$file"; then
+    rm -f "$tmp" "$bak"
+  else
+    mv "$tmp" "$file"
+    echo "-> Installed managed block in $file (backup: $bak)"
+  fi
+}
+
+if [ "$OS" = "Linux" ]; then
+  echo "-> Configuring ~/.bashrc"
+  ensure_managed_block "$HOME/.bashrc" '# Skip the rest for non-interactive shells (protects bind, prompt, etc.)
+case $- in *i*) ;; *) return ;; esac
+[ -f "$HOME/.bashrc_common" ] && . "$HOME/.bashrc_common"
+[ -f "$HOME/.bashrc.local" ] && . "$HOME/.bashrc.local"'
 fi
 
-# Configure .zshrc
 if [ "$OS" = "Darwin" ]; then
-  ZSHRC_CONTENT='# Added by dotfiles install.sh
-
-[ -f "$HOME/.zshrc_common" ] && . "$HOME/.zshrc_common"
-[ -f "$HOME/.zshrc.local" ] && . "$HOME/.zshrc.local"
-'
-  if [ ! -f "$HOME/.zshrc" ]; then
-    echo "-> Creating minimal ~/.zshrc"
-    echo "$ZSHRC_CONTENT" > "$HOME/.zshrc"
-  elif ! grep -q "zshrc_common" "$HOME/.zshrc"; then
-    echo "-> Prepending to ~/.zshrc"
-    temp_zsh="$(mktemp)"
-    echo "$ZSHRC_CONTENT" > "$temp_zsh"
-    cat "$HOME/.zshrc" >> "$temp_zsh"
-    mv "$temp_zsh" "$HOME/.zshrc"
-  else
-    echo "  = ~/.zshrc already sources common config"
-  fi
+  echo "-> Configuring ~/.zshrc"
+  ensure_managed_block "$HOME/.zshrc" '[ -f "$HOME/.zshrc_common" ] && . "$HOME/.zshrc_common"
+[ -f "$HOME/.zshrc.local" ] && . "$HOME/.zshrc.local"'
 fi
 
 echo "==> Done."
