@@ -49,6 +49,9 @@ fi
 echo "-> Linking Julia startup"
 link "$DOTFILES_DIR/julia/startup.jl" "$HOME/.julia/config/startup.jl"
 
+echo "-> Linking Julia REPL faces (GitHub Dark theme)"
+link "$DOTFILES_DIR/julia/faces.toml" "$HOME/.julia/config/faces.toml"
+
 # --- Managed block in shell rc files -------------------------------------
 # We keep only a tiny, marker-delimited stub in ~/.bashrc / ~/.zshrc that
 # sources the symlinked *_common (and *.local) files. All real logic lives

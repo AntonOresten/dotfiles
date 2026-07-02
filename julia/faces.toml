@@ -1,0 +1,145 @@
+# GitHub Dark (Default) color theme for Julia REPL syntax highlighting.
+#
+# Palette from GitHub's Primer color system / OhMyREPL's github_dark theme:
+#   blue        #79c0ff   constants, calls, symbols, numbers, macros
+#   light_blue  #a4d7ff   strings
+#   gray        #8c949e   comments
+#   light_gray  #c9d1d9   plain text / parentheses
+#   red         #fe7b72   keywords, operators
+#   purple      #d2a8ff   function definitions
+#   orange      #ffa657   type names (Primer, not used by OhMyREPL)
+#   danger red  #f85149   errors / unbalanced delimiters
+
+[julia_macro]
+foreground = "#79c0ff"
+
+[julia_symbol]
+foreground = "#79c0ff"
+
+[julia_singleton_identifier]
+inherit = "julia_symbol"
+
+[julia_type]
+foreground = "#ffa657"
+
+[julia_typedec]
+foreground = "#ffa657"
+
+[julia_comment]
+foreground = "#8c949e"
+italic = true
+
+[julia_string]
+foreground = "#a4d7ff"
+
+[julia_regex]
+inherit = "julia_string"
+
+[julia_backslash_literal]
+inherit = "julia_string"
+
+[julia_string_delim]
+foreground = "#a4d7ff"
+
+[julia_cmdstring]
+inherit = "julia_string"
+
+[julia_char]
+inherit = "julia_string"
+
+[julia_char_delim]
+inherit = "julia_string_delim"
+
+[julia_number]
+foreground = "#79c0ff"
+
+[julia_bool]
+foreground = "#79c0ff"
+
+[julia_funcall]
+foreground = "#79c0ff"
+
+[julia_broadcast]
+foreground = "#fe7b72"
+
+[julia_builtin]
+foreground = "#79c0ff"
+
+[julia_operator]
+foreground = "#fe7b72"
+
+[julia_comparator]
+inherit = "julia_operator"
+
+[julia_assignment]
+foreground = "#fe7b72"
+
+[julia_keyword]
+foreground = "#fe7b72"
+
+[julia_parentheses]
+foreground = "#c9d1d9"
+
+[julia_unpaired_parentheses]
+foreground = "#f8f8f2"
+background = "#f85149"
+
+[julia_error]
+foreground = "#f8f8f2"
+background = "#f85149"
+
+# Rainbow delimiters disabled — every nesting depth uses the plain
+# parenthesis color, so brackets are never colorized by depth.
+[julia_rainbow_paren_1]
+inherit = "julia_parentheses"
+
+[julia_rainbow_paren_2]
+inherit = "julia_parentheses"
+
+[julia_rainbow_paren_3]
+inherit = "julia_parentheses"
+
+[julia_rainbow_paren_4]
+inherit = "julia_parentheses"
+
+[julia_rainbow_paren_5]
+inherit = "julia_parentheses"
+
+[julia_rainbow_paren_6]
+inherit = "julia_parentheses"
+
+[julia_rainbow_bracket_1]
+inherit = "julia_parentheses"
+
+[julia_rainbow_bracket_2]
+inherit = "julia_parentheses"
+
+[julia_rainbow_bracket_3]
+inherit = "julia_parentheses"
+
+[julia_rainbow_bracket_4]
+inherit = "julia_parentheses"
+
+[julia_rainbow_bracket_5]
+inherit = "julia_parentheses"
+
+[julia_rainbow_bracket_6]
+inherit = "julia_parentheses"
+
+[julia_rainbow_curly_1]
+inherit = "julia_parentheses"
+
+[julia_rainbow_curly_2]
+inherit = "julia_parentheses"
+
+[julia_rainbow_curly_3]
+inherit = "julia_parentheses"
+
+[julia_rainbow_curly_4]
+inherit = "julia_parentheses"
+
+[julia_rainbow_curly_5]
+inherit = "julia_parentheses"
+
+[julia_rainbow_curly_6]
+inherit = "julia_parentheses"
